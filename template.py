@@ -5,6 +5,7 @@ pacoteInteiro8BitsdeDados6bitsDeParidade = 14
 bitDeParidadeDasLinhas = 12
 linha = 2
 coluna = 4
+bitsDeDados = 8
 #########
 # Implementacao simplificada de um esquema de paridade bidimensional 2x4
 # (paridade par).
@@ -36,26 +37,26 @@ coluna = 4
 def codePacket(originalPacket):
     
     parityMatrix = [[0 for x in range(coluna)] for y in range(linha)]
-    codedLen = len(originalPacket) / 8 * pacoteInteiro8BitsdeDados6bitsDeParidade;
+    codedLen = len(originalPacket) / bitsDeDados * pacoteInteiro8BitsdeDados6bitsDeParidade;
     codedPacket = [0 for x in range(codedLen)]
 
     ##
     # Itera por cada byte do pacote original.
     ##
-    for i in range(len(originalPacket) / 8):
+    for i in range(len(originalPacket) / bitsDeDados):
 
         ##
         # Bits do i-esimo byte sao dispostos na matriz.
         ##
         for j in range(linha):
             for k in range(coluna):
-                parityMatrix[j][k] = originalPacket[i * 8 + coluna * j + k]
+                parityMatrix[j][k] = originalPacket[i * bitsDeDados + coluna * j + k]
 
         ##
         # Replicacao dos bits de dados no pacote codificado.
         ##
-        for j in range(8):
-            codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + j] = originalPacket[i * 8 + j]
+        for j in range(bitsDeDados):
+            codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + j] = originalPacket[i * bitsDeDados + j]
 
         ##
         # Calculo dos bits de paridade, que sao colocados
@@ -63,9 +64,9 @@ def codePacket(originalPacket):
         ##
         for j in range(coluna):
             if (parityMatrix[0][j] + parityMatrix[1][j]) % linha == 0:
-                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + 8 + j] = 0
+                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitsDeDados + j] = 0
             else:
-                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + 8 + j] = 1
+                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitsDeDados + j] = 1
 
         ##
         # Calculo dos bits de paridade, que sao colocados
@@ -82,7 +83,10 @@ def codePacket(originalPacket):
 
 ## TODO Refatorar isso 
 def calculaBitDeParidade(parityMatrix,j):
-    return (parityMatrix[j][0] + parityMatrix[j][1] + parityMatrix[j][2] + parityMatrix[j][3]) % linha
+    sum = 0
+    for i in range(len(parityMatrix[j])):
+        sum += parityMatrix[j][i]
+    return sum % linha
 
 ##
 # Executa decodificacao do pacote transmittedPacket, gerando
@@ -113,7 +117,7 @@ def decodePacket(transmittedPacket):
         # Bits de paridade das colunas.
         ##
         for j in range(coluna):
-            parityColumns[j] = transmittedPacket[i + 8 + j]
+            parityColumns[j] = transmittedPacket[i + bitsDeDados + j]
 
         ##
         # Bits de paridade das linhas.
@@ -161,7 +165,7 @@ def decodePacket(transmittedPacket):
         ##
         for j in range(linha):
             for k in range(coluna):
-                decodedPacket[8 * n + coluna * j + k] = parityMatrix[j][k]
+                decodedPacket[bitsDeDados * n + coluna * j + k] = parityMatrix[j][k]
 
         ##
         # Incrementar numero de bytes na saida.
@@ -185,7 +189,7 @@ def decodePacket(transmittedPacket):
 ##
 def generateRandomPacket(l):
 
-    return [random.randint(0,1) for x in range(8 * l)]
+    return [random.randint(0,1) for x in range(bitsDeDados * l)]
 
 ##
 # Gera um numero pseudo-aleatorio com distribuicao geometrica.
@@ -339,10 +343,10 @@ for i in range(reps):
         totalPacketErrorCount = totalPacketErrorCount + 1
 
 print 'Numero de transmissoes simuladas: {0:d}\n'.format(reps)
-print 'Numero de bits transmitidos: {0:d}'.format(reps * packetLength * 8)
+print 'Numero de bits transmitidos: {0:d}'.format(reps * packetLength * bitsDeDados)
 print 'Numero de bits errados inseridos: {0:d}\n'.format(totalInsertedErrorCount)
 print 'Taxa de erro de bits (antes da decodificacao): {0:.2f}%'.format(float(totalInsertedErrorCount) / float(reps * len(codedPacket)) * 100.0)
 print 'Numero de bits corrompidos apos decodificacao: {0:d}'.format(totalBitErrorCount)
-print 'Taxa de erro de bits (apos decodificacao): {0:.2f}%\n'.format(float(totalBitErrorCount) / float(reps * packetLength * 8) * 100.0)
+print 'Taxa de erro de bits (apos decodificacao): {0:.2f}%\n'.format(float(totalBitErrorCount) / float(reps * packetLength * bitsDeDados) * 100.0)
 print 'Numero de pacotes corrompidos: {0:d}'.format(totalPacketErrorCount)
 print 'Taxa de erro de pacotes: {0:.2f}%'.format(float(totalPacketErrorCount) / float(reps) * 100.0)
