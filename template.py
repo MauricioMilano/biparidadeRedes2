@@ -1,11 +1,11 @@
 import random
 import math
 import sys
-pacoteInteiro8BitsdeDados6bitsDeParidade = 14
-bitDeParidadeDasLinhas = 12
-linha = 2
-coluna = 4
-bitsDeDados = 8
+linha = 3
+coluna = 5
+bitsDeDados = linha*coluna
+bitDeParidadeDasLinhas=bitsDeDados+coluna
+pacoteInteiro8BitsdeDados6bitsDeParidade = bitsDeDados+linha+coluna
 #########
 # Implementacao simplificada de um esquema de paridade bidimensional 2x4
 # (paridade par).
