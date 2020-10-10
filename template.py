@@ -22,7 +22,7 @@ import sys
 def codePacket(originalPacket):
     
     parityMatrix = [[0 for x in range(coluna)] for y in range(linha)]
-    codedLen = len(originalPacket) / bitsDeDados * pacoteInteiroDadosMaisParidade;
+    codedLen = len(originalPacket) / bitsDeDados * pacoteInteiroDadosMaisParidade
     codedPacket = [0 for x in range(codedLen)]
 
     ##
@@ -35,7 +35,7 @@ def codePacket(originalPacket):
         ##
         for j in range(linha):
             for k in range(coluna):
-                parityMatrix[j][k] = originalPacket[(i * bitsDeDados + coluna * j + k)]
+                parityMatrix[j][k] = originalPacket[((i * bitsDeDados) + (coluna * j) + k)]
 
         ##
         # Replicacao dos bits de dados no pacote codificado.
@@ -48,7 +48,7 @@ def codePacket(originalPacket):
         # no pacote codificado: paridade das colunas.
         ##
         for j in range(coluna):
-            if calculaBitDeParidadeColuna(parityMatrix, j):
+            if calculaBitDeParidadeColuna(parityMatrix, j) == 0:
                 codedPacket[i * pacoteInteiroDadosMaisParidade + bitsDeDados + j] = 0
             else:
                 codedPacket[i * pacoteInteiroDadosMaisParidade + bitsDeDados + j] = 1
@@ -71,13 +71,15 @@ def calculaBitDeParidadeLinha(parityMatrix,j):
         sum += parityMatrix[j][i]
     return sum % linha
 def calculaBitDeParidadeColuna(parityMatrix, j):
-    return (parityMatrix[0][j] + parityMatrix[1][j]) % linha == 0
+    sum = 0 
+    for i in range(len(parityMatrix)):
+        sum += parityMatrix[i][j]
+    return sum % coluna
 ##
 # Executa decodificacao do pacote transmittedPacket, gerando
 # novo pacote decodedPacket.
 ##
 def decodePacket(transmittedPacket):
-
     parityMatrix = [[0 for x in range(coluna)] for y in range(linha)]
     parityColumns = [0 for x in range(coluna)]
     parityRows = [0 for x in range(linha)]
@@ -86,7 +88,7 @@ def decodePacket(transmittedPacket):
     n = 0 # Contador de bytes no pacote decodificado.
 
     ##
-    # Itera por cada sequencia de pacoteInteiroDadosMaisParidade bits (8 de dados + 6 de paridade).
+    # Itera por cada sequencia de pacoteInteiroDadosMaisParidade bits.
     ##
     for i in range(0, len(transmittedPacket), pacoteInteiroDadosMaisParidade):
 
@@ -117,7 +119,8 @@ def decodePacket(transmittedPacket):
         ##
         errorInColumn = -1
         for j in range(coluna):
-            if (parityMatrix[0][j] + parityMatrix[1][j]) % linha != parityColumns[j]:
+            # if (parityMatrix[0][j] + parityMatrix[1][j]) % linha != parityColumns[j]:
+            if (calculaBitDeParidadeColuna(parityMatrix,j) != parityColumns[j]):
                 errorInColumn = j
                 break
 
