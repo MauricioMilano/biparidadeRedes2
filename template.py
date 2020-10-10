@@ -1,27 +1,12 @@
 import random
 import math
 import sys
-linha = 3
-coluna = 5
-bitsDeDados = linha*coluna
-bitDeParidadeDasLinhas=bitsDeDados+coluna
-pacoteInteiro8BitsdeDados6bitsDeParidade = bitsDeDados+linha+coluna
+
 #########
-# Implementacao simplificada de um esquema de paridade bidimensional 2x4
-# (paridade par).
+# Implementacao um esquema sem qualquer metodo de codificao.
 #
-# Cada byte do pacote (2x4 = 8 bits) eh mapeado para uma matrix 2x4:
-# d0 d1 d2 d3 d4 d5 d6 d7 => --           --
-#                            | d0 d1 d2 d3 |
-#                            | d4 d5 d6 d7 |
-#                            --           --
-# Cada coluna 0 <= i <= 3 da origem a uma paridade pc_i.
-# Cada linha 0 <= i <= 1 da origem a uma paridade pl_i.
-#
-# No pacote codificado, os bits sao organizados na forma:
-# d0 d1 d2 d3 d4 d5 d6 d7 pc0 pc1 pc2 pc3 pl0 pl1
-#
-# Isso se repete para cada byte do pacote original.
+# Cada byte do pacote original eh mapeado para o mesmo byte no pacote
+# codificado.
 ########
 
 ###
@@ -50,7 +35,7 @@ def codePacket(originalPacket):
         ##
         for j in range(linha):
             for k in range(coluna):
-                parityMatrix[j][k] = originalPacket[i * bitsDeDados + coluna * j + k]
+                parityMatrix[j][k] = originalPacket[(i * bitsDeDados + coluna * j + k)]
 
         ##
         # Replicacao dos bits de dados no pacote codificado.
@@ -75,9 +60,9 @@ def codePacket(originalPacket):
         for j in range(linha):
             ## TODO refatorar isso 
             if calculaBitDeParidade(parityMatrix,j) == 0 :
-                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitDeParidadeDasLinhas + j] = 0
+                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitDeDadosMaisBitDeColunas + j] = 0
             else:
-                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitDeParidadeDasLinhas + j] = 1
+                codedPacket[i * pacoteInteiro8BitsdeDados6bitsDeParidade + bitDeDadosMaisBitDeColunas + j] = 1
 
     return codedPacket
 
@@ -123,7 +108,7 @@ def decodePacket(transmittedPacket):
         # Bits de paridade das linhas.
         ##
         for j in range(linha):
-            parityRows[j] = transmittedPacket[i + bitDeParidadeDasLinhas + j]
+            parityRows[j] = transmittedPacket[i + bitDeDadosMaisBitDeColunas + j]
 
         ##
         # Verificacao dos bits de paridade: colunas.
@@ -264,12 +249,14 @@ def help(selfName):
 
     sys.stderr.write("Simulador de metodos de FEC/codificacao.\n\n")
     sys.stderr.write("Modo de uso:\n\n")
-    sys.stderr.write("\t" + selfName + " <tam_pacote> <reps> <prob. erro>\n\n")
+    sys.stderr.write("\t" + selfName + " <tam_pacote> <reps> <prob. erro> <linha> <coluna>\n\n")
     sys.stderr.write("Onde:\n")
     sys.stderr.write("\t- <tam_pacote>: tamanho do pacote usado nas simulacoes (em bytes).\n")
     sys.stderr.write("\t- <reps>: numero de repeticoes da simulacao.\n")
     sys.stderr.write("\t- <prob. erro>: probabilidade de erro de bits (i.e., probabilidade\n")
-    sys.stderr.write("de que um dado bit tenha seu valor alterado pelo canal.)\n\n")
+    sys.stderr.write("\t  de que um dado bit tenha seu valor alterado pelo canal.)\n")
+    sys.stderr.write("\t- <linha>: quantidade de linhas da matriz\n")
+    sys.stderr.write("\t- <coluna>: quantidade de colunas da matriz\n")
 
     sys.exit(1)
 
@@ -293,13 +280,17 @@ totalInsertedErrorCount = 0
 ##
 # Leitura dos argumentos de linha de comando.
 ##
-if len(sys.argv) != 4:
+if len(sys.argv) != 6:
     help(sys.argv[0])
 
 packetLength = int(sys.argv[1])
 reps = int(sys.argv[2])
 errorProb = float(sys.argv[3])
-
+linha = int(sys.argv[4])
+coluna = int(sys.argv[5])
+bitsDeDados = linha*coluna
+bitDeDadosMaisBitDeColunas=bitsDeDados+coluna
+pacoteInteiro8BitsdeDados6bitsDeParidade = bitsDeDados+linha+coluna
 if packetLength <= 0 or reps <= 0 or errorProb < 0 or errorProb > 1:
     help(argv[0])
 
