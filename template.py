@@ -65,10 +65,10 @@ def codePacket(originalPacket):
 
     return codedPacket
 
-def calculaBitDeParidadeLinha(parityMatrix,j):
+def calculaBitDeParidadeLinha(parityMatrix,i):
     sum = 0
-    for i in range(len(parityMatrix[j])):
-        sum += parityMatrix[j][i]
+    for j in range(len(parityMatrix[i])):
+        sum += parityMatrix[i][j]
     return sum % linha
 def calculaBitDeParidadeColuna(parityMatrix, j):
     sum = 0 
@@ -119,7 +119,6 @@ def decodePacket(transmittedPacket):
         ##
         errorInColumn = -1
         for j in range(coluna):
-            # if (parityMatrix[0][j] + parityMatrix[1][j]) % linha != parityColumns[j]:
             if (calculaBitDeParidadeColuna(parityMatrix,j) != parityColumns[j]):
                 errorInColumn = j
                 break
